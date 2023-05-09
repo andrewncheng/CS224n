@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-CS224N 2021-2022: Homework 3
+CS224N 20qui21-2022: Homework 3
 parser_model.py: Feed-Forward Neural Network for Dependency Parsing
 Sahil Chopra <schopra8@stanford.edu>
 Haoshen Hong <haoshen@stanford.edu>
