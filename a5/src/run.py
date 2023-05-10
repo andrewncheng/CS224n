@@ -105,12 +105,12 @@ def myprogram():
         if args.reading_params_path is not None:
             my_model.load_state_dict(torch.load(args.reading_params_path))
             tconf = trainer.TrainerConfig(max_epochs=0, batch_size=256, learning_rate=args.finetune_lr,
-            lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, num_workers=4)
+            lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, num_workers=2)
         # fine-tuning WITHOUT pretrained model
         else:
             tconf = trainer.TrainerConfig(max_epochs=75, batch_size=256,
                  learning_rate=args.finetune_lr, lr_decay=True, warmup_tokens=512*20,
-                 final_tokens=200*len(pretrain_dataset)*block_size, num_workers=4)
+                 final_tokens=200*len(pretrain_dataset)*block_size, num_workers=2)
         tuner = trainer.Trainer(my_model, tune_dataset, None, tconf)
         tuner.train()
         torch.save(my_model.state_dict(), args.writing_params_path)
