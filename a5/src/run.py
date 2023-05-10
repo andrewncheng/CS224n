@@ -64,8 +64,10 @@ Don't change above here; write your code below
 # note: models should moved to device defined on line 34.
 
 if args.variant == 'vanilla':
-    pass # [part c] Make some model here
+    my_model = model.GPT(mconf)
+    # pass [part c] Make some model here
 elif args.variant == 'perceiver':
+    my_model = ...
     # set mconf.perceiver, and mconf.bottleneck_dim parameters appropriately.
     pass # [part g] Make some other model here
 else:
@@ -96,6 +98,21 @@ if args.function == 'pretrain':
 elif args.function == 'finetune':
     assert args.writing_params_path is not None
     assert args.finetune_corpus_path is not None
+    # fine-tuning WITH pretrained model
+    finetune_corpus = open(args.finetune_corpus_path, 'r').read()
+    tune_dataset = dataset.NameDataset(pretrain_dataset, finetune_corpus)
+    if args.reading_params_path:
+        my_model.load_state_dict(torch.load(args.reading_params_path))
+        tconf = trainer.TrainerConfig(max_epochs=10, batch_size=256, learning_rate=args.finetune_lr,
+        lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, num_workers=0)
+    # fine-tuning WITHOUT pretrained model
+    else:
+        tconf = trainer.TrainerConfig(max_epochs=75, batch_size=256,
+             learning_rate=args.finetune_lr, lr_decay=True, warmup_tokens=512*20,
+             final_tokens=200*len(pretrain_dataset)*block_size, num_workers=4)
+    tuner = trainer.Trainer(my_model, tune_dataset, None, tconf)
+    tuner.train()
+    torch.save(my_model.state_dict(), args.writing_params_path)
     # TODO [part c] [part f]:
     # - Given:
     #     1. A finetuning corpus specified in args.finetune_corpus_path
