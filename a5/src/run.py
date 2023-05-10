@@ -104,12 +104,12 @@ elif args.function == 'finetune':
     if args.reading_params_path:
         my_model.load_state_dict(torch.load(args.reading_params_path))
         tconf = trainer.TrainerConfig(max_epochs=10, batch_size=256, learning_rate=args.finetune_lr,
-        lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, num_workers=0)
+        lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_datasconet)*block_size, num_workers=0)
     # fine-tuning WITHOUT pretrained model
     else:
         tconf = trainer.TrainerConfig(max_epochs=75, batch_size=256,
              learning_rate=args.finetune_lr, lr_decay=True, warmup_tokens=512*20,
-             final_tokens=200*len(pretrain_dataset)*block_size, num_workers=4)
+             final_tokens=200*len(pretrain_dataset)*block_size, num_workers=0)
     tuner = trainer.Trainer(my_model, tune_dataset, None, tconf)
     tuner.train()
     torch.save(my_model.state_dict(), args.writing_params_path)
