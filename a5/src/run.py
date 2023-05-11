@@ -65,7 +65,7 @@ Don't change above here; write your code below
 # note: models should moved to device defined on line 34.
 
 if args.variant == 'vanilla':
-    my_model = model.GPT(mconf)
+    my_model = model.GPT(mconf).to(device)
     # pass [part c] Make some model here
 elif args.variant == 'perceiver':
     #my_model = ...
