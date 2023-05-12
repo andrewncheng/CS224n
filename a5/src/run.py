@@ -68,7 +68,7 @@ if args.variant == 'vanilla':
     my_model = model.GPT(mconf).to(device)
     # pass [part c] Make some model here
 elif args.variant == 'perceiver':
-    #my_model = ...
+    my_model = ...
     # set mconf.perceiver, and mconf.bottleneck_dim parameters appropriately.
     pass # [part g] Make some other model here
 else:
@@ -77,6 +77,13 @@ else:
 # Perform pretraining, finetuning, or evaluation
 if args.function == 'pretrain':
     assert args.writing_params_path is not None
+    # save model parameters
+    tconf = trainer.TrainerConfig(max_epochs=650, batch_size=128, learning_rate=args.pretrain_lr, lr_decay=True,
+                                    warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
+                                    num_workers=0, writer=writer)
+    trainer = trainer.Trainer(my_model, pretrain_dataset, None, tconf)
+    trainer.train()
+    torch.save(my_model.state_dict(), args.writing_params_path)
     # TODO [part f]:
     # - Given:
     #     1. A corpus specified in args.pretrain_corpus_path
@@ -95,7 +102,6 @@ if args.function == 'pretrain':
     # final_tokens=200*len(pretrain_dataset)*block_size
     # num_workers=4
     # writer=writer
-    raise NotImplementedError
 elif args.function == 'finetune':
     assert args.writing_params_path is not None
     assert args.finetune_corpus_path is not None
@@ -105,12 +111,13 @@ elif args.function == 'finetune':
     if args.reading_params_path is not None:
         my_model.load_state_dict(torch.load(args.reading_params_path))
         tconf = trainer.TrainerConfig(max_epochs=0, batch_size=256, learning_rate=args.finetune_lr,
-        lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, num_workers=2)
+        lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, num_workers=2,
+                                    writer=writer)
     # fine-tuning WITHOUT pretrained model
     else:
         tconf = trainer.TrainerConfig(max_epochs=75, batch_size=256,
              learning_rate=args.finetune_lr, lr_decay=True, warmup_tokens=512*20,
-             final_tokens=200*len(pretrain_dataset)*block_size, num_workers=2)
+             final_tokens=200*len(pretrain_dataset)*block_size, num_workers=2, writer=writer)
     tuner = trainer.Trainer(my_model, tune_dataset, None, tconf)
     tuner.train()
     torch.save(my_model.state_dict(), args.writing_params_path)
@@ -152,18 +159,23 @@ elif args.function == 'evaluate':
     assert args.outputs_path is not None
     assert args.reading_params_path is not None
     assert args.eval_corpus_path is not None
-    my_model.load_state_dict(torch.load(args.reading_params_path))
+    my_model.load_state_dict(torch.load(args.reading_params_path, map_location='cpu'))
     correct = 0
     total = 0
+    # print("stoi", pretrain_dataset.stoi)
     with open(args.outputs_path, 'w', encoding='utf-8') as fout:
         predictions = []
         for line in tqdm(open(args.eval_corpus_path, encoding='utf-8')):
             x = line.split('\t')[0]
-            x = x + '⁇'
+            x = x + '⁇' #  Where was Bryan Dubreuiel born? -->  Where was Bryan Dubreuiel born?⁇
+            print('x : ', x)
             x = torch.tensor([pretrain_dataset.stoi[s] for s in x], dtype=torch.long)[None,...].to(device)
             pred = utils.sample(my_model, x, 32, sample=False)[0]
+            print("pred", pred)
             completion = ''.join([pretrain_dataset.itos[int(i)] for i in pred])
+            print("completion : ", completion)
             pred = completion.split('⁇')[1]
+            print('pred after split : ', pred)
             predictions.append(pred)
             fout.write(pred + '\n')
         total, correct = utils.evaluate_places(args.eval_corpus_path, predictions)

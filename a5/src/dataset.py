@@ -2,6 +2,7 @@ import random
 import torch
 from torch.utils.data import Dataset
 import argparse
+import numpy as np
 
 """
 The input-output pairs (x, y) of the NameDataset are of the following form:
@@ -152,8 +153,8 @@ class CharCorruptionDataset(Dataset):
         chars.insert(0, self.MASK_CHAR)
         chars.insert(0, self.PAD_CHAR)
 
-        self.stoi = { ch:i for i,ch in enumerate(chars) }
-        self.itos = { i:ch for i,ch in enumerate(chars) }
+        self.stoi = {ch: i for i, ch in enumerate(chars)}
+        self.itos = {i: ch for i, ch in enumerate(chars)}
 
         data_size, vocab_size = len(data), len(chars)
         print('data has %d characters, %d unique.' % (data_size, vocab_size))
@@ -167,8 +168,39 @@ class CharCorruptionDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
+        # returns a data point (x,y) where x and y are Long tensors of length self.block_size.
+        document = self.data[idx]
+        #print("document", document)
+        trunc_len = int(torch.randint(low=4, high=int(self.block_size * 7/8) + 1, size=(1,))[0])
+        #print("trunc_len -----" , trunc_len)
+        trunc_doc = document[:trunc_len]
+        #print("trunc_doc ---- ", trunc_doc)
+
+        # we want mask_content to be on average length 1/4 of truncated document length
+        t_tilde = int(trunc_len/4)
+        # U is the length of our masked_content
+        U = int(torch.randint(low=1, high=2*t_tilde, size=(1,))[0])
+        # M is the index at which the masked content starts
+        M = int(torch.randint(low=0, high=trunc_len - t_tilde + 1, size=(1,))[0])
+        prefix, masked_content, suffix = trunc_doc[:M], trunc_doc[M:M + U], trunc_doc[M + U:]
+
+        masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content
+        masked_string = masked_string + self.PAD_CHAR * (self.block_size - len(masked_string) + 1)
+
+        x = masked_string[:-1]
+        y = masked_string[1:]
+        x = torch.tensor([self.stoi[char] for char in x], dtype=torch.long)
+        y = torch.tensor([self.stoi[char] for char in y], dtype=torch.long)
+
+        return x,y
+
+
+
+
+
+
+
         # TODO [part e]: see spec above
-        raise NotImplementedError
 
 """
 Code under here is strictly for your debugging purposes; feel free to modify
