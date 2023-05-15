@@ -62,9 +62,17 @@ class Block(nn.Module):
             nn.Linear(4 * config.n_embd, config.n_embd),
             nn.Dropout(config.resid_pdrop),
         )
+        print("config.n_embed", config.n_embd)
 
     def forward(self, x):
+        print("DIM XXXXXX", x.shape)
+        print("DIM SELF.LN1(x)", self.ln1(x).shape)
+
+        print("THIS PASSED SELF ATTENTION", self.attn(self.ln1(x)))
+        print("dim self.attn", self.attn(self.ln1(x)).shape)
+        # error lies in passing ln1(x) into self.attn
         x = x + self.attn(self.ln1(x))
+        print("x + self attention is success!")
         x = x + self.mlp(self.ln2(x))
         return x
 
@@ -108,9 +116,9 @@ class DownProjectBlock(nn.Module):
         Use the layernorm layers on C, and then on the input to the MLP.
         """
         # C acts as the query and x_input acts as the input -- why do we use layernorm layer on C?
-        x_input = x_input + self.attn(self.ln1(self.C), x_input)
+        x_input = x_input + self.attn(self.ln1(self.C), self.ln1(x_input))
         output = x_input + self.mlp(self.ln2(x_input))
-
+        print('OUTPUT SIZE', output.shape)
         return output
         ### YOUR CODE HERE
         ### Hint: Copy over the code from Block and make necessary modifications.
@@ -168,9 +176,9 @@ class GPT(nn.Module):
         self.drop = nn.Dropout(config.embd_pdrop)
         # transformer
         self.perceiver = config.perceiver
-        if config.perceiver:            
+        if config.perceiver:
             input_block_size = config.block_size
-            
+            print("INPUT BLOCK SIZE", input_block_size)
             # input sequence based causal mask
             self.down_block = DownProjectBlock(config)
             
