@@ -104,7 +104,7 @@ class CausalCrossAttention(nn.Module):
         # values from x1
         v = self.value(x_kv).view(Bk, Tk, self.n_head, Ck // self.n_head).transpose(1, 2) # (B, nh, Tk, hs)
 
-        # causal self-attention;  (B, nh, Tk, hs) x (B, nh, hs, Tq) -> (B, nh, Tq, Tk)
+        # causal self-attention;  (B, nh, Tq, hs) x (B, nh, hs, Tk) -> (B, nh, Tq, Tk)
         att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
         
         B = max(Bk, Bq)

@@ -89,6 +89,16 @@ class DownProjectBlock(nn.Module):
     def __init__(self, config):
         super().__init__()
         ### YOUR CODE HERE
+        self.ln1 = nn.LayerNorm(config.n_embd)
+        self.ln2 = nn.LayerNorm(config.n_embd)
+        self.attn = attention.CausalCrossAttention(config)
+        self.mlp = nn.Sequential(
+            nn.Linear(config.n_embd, 4 * config.n_embd),
+            nn.GELU(),
+            nn.Linear(4 * config.n_embd, config.n_embd),
+            nn.Dropout(config.resid_pdrop),
+        )
+        self.C = nn.Parameter(nn.init.xavier_uniform_(torch.empty(1, config.bottleneck_dim, config.n_embd)))
         ### Hint: Copy over the code from Block and make necessary modifications.
         pass
         ### END YOUR CODE
@@ -97,13 +107,16 @@ class DownProjectBlock(nn.Module):
         """Hint: perform cross-attention between x_input and self.C.
         Use the layernorm layers on C, and then on the input to the MLP.
         """
+        # C acts as the query and x_input acts as the input -- why do we use layernorm layer on C?
+        x_input = x_input + self.attn(self.ln1(self.C), x_input)
+        output = x_input + self.mlp(self.ln2(x_input))
+
+        return output
         ### YOUR CODE HERE
         ### Hint: Copy over the code from Block and make necessary modifications.
         ### Should be around 3-5 lines.
-        pass
-        ### END YOUR CODE
-    
-    
+
+
 class UpProjectBlock(nn.Module):
     """Transformer block used for up projection.
     
@@ -113,8 +126,16 @@ class UpProjectBlock(nn.Module):
     """
     def __init__(self, config):
         super().__init__()
-        ### YOUR CODE HERE
-        ### Hint: Copy over the code from Block and make necessary modifications.
+        self.ln1 = nn.LayerNorm(config.n_embd)
+        self.ln2 = nn.LayerNorm(config.n_embd)
+        self.attn = attention.CausalCrossAttention(config)
+        self.mlp = nn.Sequential(
+            nn.Linear(config.n_embd, 4 * config.n_embd),
+            nn.GELU(),
+            nn.Linear(4 * config.n_embd, config.n_embd),
+            nn.Dropout(config.resid_pdrop),
+        )
+        self.C = nn.Parameter(nn.init.xavier_uniform_(torch.empty(1, config.bottleneck_dim, config.n_embd)))
         pass
         ### END YOUR CODE
     
@@ -123,6 +144,11 @@ class UpProjectBlock(nn.Module):
         x_input. 
         Use the layernorm layers on y, and then on the input to the MLP.
         """
+        # original input vector x_input acts as query
+        # y acts as the input from the previous layer
+        y = y + self.attn(self.ln1(y), x_input)
+        output = y + self.mlp(self.ln2(y))
+        return output
         ### YOUR CODE HERE
         ### Hint: Copy over the code from Block and make necessary modifications.
         ### Should be around 3-5 lines.
