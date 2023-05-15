@@ -65,10 +65,12 @@ Don't change above here; write your code below
 # note: models should moved to device defined on line 34.
 
 if args.variant == 'vanilla':
+
     my_model = model.GPT(mconf).to(device)
     # pass [part c] Make some model here
 elif args.variant == 'perceiver':
     mconf.bottleneck_dim = args.bottleneck_dim
+    mconf.perceiver = True
     my_model = model.GPT(mconf).to(device)
     # set mconf.perceiver, and mconf.bottleneck_dim parameters appropriately.
      # [part g] Make some other model here
