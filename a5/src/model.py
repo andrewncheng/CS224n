@@ -65,12 +65,6 @@ class Block(nn.Module):
         print("config.n_embed", config.n_embd)
 
     def forward(self, x):
-        print("DIM XXXXXX", x.shape)
-        print("DIM SELF.LN1(x)", self.ln1(x).shape)
-
-        print("THIS PASSED SELF ATTENTION", self.attn(self.ln1(x)))
-        print("dim self.attn", self.attn(self.ln1(x)).shape)
-        # error lies in passing ln1(x) into self.attn
         x = x + self.attn(self.ln1(x))
         print("x + self attention is success!")
         x = x + self.mlp(self.ln2(x))
