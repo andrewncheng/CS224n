@@ -41,7 +41,9 @@ class VAE(nn.Module):
         return z
 
     def forward(self, x):
-        mu, logvar = self.encode(x).to(self.device)
+        mu, logvar = self.encode(x)
+        mu = mu.to(self.device)
+        logvar = logvar.to(self.device)
         z = self.sample(mu, logvar)
         x_reconstructed = self.decode(z)
         return x_reconstructed, mu, logvar
