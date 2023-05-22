@@ -1,5 +1,6 @@
 import torch
 import argparse
+import matplotlib
 import matplotlib.pyplot as plt
 from VAE import VAE
 # configuration
