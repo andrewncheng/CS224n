@@ -35,15 +35,12 @@ class VAE(nn.Module):
     def sample(self, mu, logvar):
         # given \mu and \var, sample z ~ N(mu, var^2) using trick -- z  = mu + var * epsilon
         # log trick for variance --> std = exp(log( std**2 / 2)) which allows for negatives values of sigma
-        print("enter")
-        epsilon = torch.normal(torch.zeros(self.hidden_dim), torch.ones(self.hidden_dim))
+        epsilon = torch.normal(torch.zeros(self.hidden_dim), torch.ones(self.hidden_dim)).to(self.device)
         z = mu + torch.exp(0.5 * logvar)*epsilon
         return z
 
     def forward(self, x):
         mu, logvar = self.encode(x)
-        mu = mu.to(self.device)
-        logvar = logvar.to(self.device)
         z = self.sample(mu, logvar)
         x_reconstructed = self.decode(z)
         return x_reconstructed, mu, logvar
