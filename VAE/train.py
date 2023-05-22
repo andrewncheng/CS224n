@@ -34,10 +34,11 @@ for epoch in tqdm(range(num_epochs)):
     pbar = tqdm(enumerate(train_loader))
     for i, (x_batch, _) in pbar:
         x_batch = x_batch.to(device).view(x_batch.shape[0], input_dim)
+        #print("x_batch[0]", x_batch[0])
         x_reconstructed, mu, logvar = model(x_batch)
         reconstruction_loss = loss_fn(x_reconstructed, x_batch)
-        kl_divergence = torch.sum(mu - logvar - 1 + torch.exp(0.5 * logvar))
-
+        kl_divergence = torch.sum(mu**2 - logvar - 1 + torch.exp(0.5 * logvar))
+        #print("KL_DIVERGENCE------", kl_divergence)
         optimizer.zero_grad()
         loss = reconstruction_loss + kl_divergence
         loss.backward()
