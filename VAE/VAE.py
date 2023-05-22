@@ -9,16 +9,16 @@ class VAE(nn.Module):
         self.input_dim = input_dim
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.encoder = nn.Sequential(
-            nn.Linear(self.input_dim, 400),
+            nn.Linear(self.input_dim, 512),
             nn.ReLU(),
-            nn.Linear(400, 2 * self.hidden_dim),  # one for mean and one for variance
+            nn.Linear(512, self.hidden_dim + self.hidden_dim),  # one for mean and one for variance
             # nn.ReLU() ReLU only allows for non-negative values. We want to allow mu and sigma to also be negative
         )
 
         self.decoder = nn.Sequential(
-            nn.Linear(self.hidden_dim, 400),
+            nn.Linear(self.hidden_dim, 512),
             nn.ReLU(),
-            nn.Linear(400, self.input_dim),
+            nn.Linear(512, self.input_dim),
             # if we normalize our images to values between 0-1 then we should apply sigmoid to map values to 0-1
             nn.Sigmoid()
         )

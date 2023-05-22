@@ -19,7 +19,7 @@ input_dim = 784
 hidden_dim = 300
 num_epochs = 80
 batch_size = 128
-lr = 0.001
+lr = 1e-5
 
 # dataset loading
 dataset = datasets.MNIST(root="dataset/", train=True, transform=transforms.ToTensor(), download=True)
@@ -37,10 +37,13 @@ for epoch in tqdm(range(num_epochs)):
         #print("x_batch[0]", x_batch[0])
         x_reconstructed, mu, logvar = model(x_batch)
         reconstruction_loss = loss_fn(x_reconstructed, x_batch)
-        kl_divergence = torch.sum(mu**2 - logvar - 1 + torch.exp(0.5 * logvar))
+        kl_divergence = 0.5 * torch.sum(mu**2 + torch.exp(logvar) - logvar - 1)
         #print("KL_DIVERGENCE------", kl_divergence)
         optimizer.zero_grad()
         loss = reconstruction_loss + kl_divergence
+        if i %20 == 0:
+            print("RECONSTRUCTION LOSS", reconstruction_loss)
+            print("KL_DIVERGENCE", kl_divergence)
         loss.backward()
         optimizer.step()
         pbar.set_postfix(loss=loss.item())
