@@ -11,10 +11,12 @@ argp.add_argument('--save_figures_path', default=None)
 args = argp.parse_args()
 
 
-model = torch.load(args.reading_params_path)
-model.eval()
+
+
 hidden_dim = 300
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
+model = torch.load(args.reading_params_path, map_location=device)
+model.eval()
 for i in range(10):
 
     ##########################
@@ -38,4 +40,4 @@ for i in range(10):
         curr_img = img.detach().to(torch.device('cpu'))
         ax.imshow(curr_img.view((image_width, image_width)), cmap='binary')
 
-    plt.savefig(args.save_figure_path)
+    plt.savefig(args.save_figures_path)

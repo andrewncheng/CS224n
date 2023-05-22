@@ -18,8 +18,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 input_dim = 784
 hidden_dim = 300
 num_epochs = 80
-batch_size = 32
-lr = 5e-7
+batch_size = 128
+lr = 0.001
 
 # dataset loading
 dataset = datasets.MNIST(root="dataset/", train=True, transform=transforms.ToTensor(), download=True)
@@ -45,7 +45,7 @@ for epoch in tqdm(range(num_epochs)):
         optimizer.step()
         pbar.set_postfix(loss=loss.item())
 
-#model = model.to("cpu")
+model = model.to("cpu")
 torch.save(model, args.writing_params_path)
 
 
