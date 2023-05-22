@@ -35,6 +35,7 @@ class VAE(nn.Module):
     def sample(self, mu, logvar):
         # given \mu and \var, sample z ~ N(mu, var^2) using trick -- z  = mu + var * epsilon
         # log trick for variance --> std = exp(log( std**2 / 2)) which allows for negatives values of sigma
+        print("enter")
         epsilon = torch.normal(torch.zeros(self.hidden_dim), torch.ones(self.hidden_dim))
         z = mu + torch.exp(0.5 * logvar)*epsilon
         return z
@@ -47,13 +48,13 @@ class VAE(nn.Module):
 
 
 
-print("hello")
-image = torch.randn(4, 28*28)
-vae = VAE(input_dim=784, hidden_dim=256)
-x_reconstruct, mean, sigma = vae(image)
-print(x_reconstruct.shape)
-print(mean.shape)
-print(sigma.shape)
+# print("hello")
+# image = torch.randn(4, 28*28)
+# vae = VAE(input_dim=784, hidden_dim=256)
+# x_reconstruct, mean, sigma = vae(image)
+# print(x_reconstruct.shape)
+# print(mean.shape)
+# print(sigma.shape)
 
 
 

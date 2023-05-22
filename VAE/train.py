@@ -44,7 +44,7 @@ for epoch in tqdm(range(num_epochs)):
         optimizer.step()
         pbar.set_postfix(loss=loss.item())
 
-model = model.to("cpu")
+#model = model.to("cpu")
 torch.save(model, args.writing_params_path)
 
 
