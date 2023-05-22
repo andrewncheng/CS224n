@@ -6,6 +6,7 @@ from VAE import VAE
 
 argp = argparse.ArgumentParser()
 argp.add_argument('--reading_params_path',default=None)
+argp.add_argument('--save_figures_path', default=None)
 args = argp.parse_args()
 
 
@@ -36,4 +37,4 @@ for i in range(10):
         curr_img = img.detach().to(torch.device('cpu'))
         ax.imshow(curr_img.view((image_width, image_width)), cmap='binary')
 
-    plt.show()
+    plt.savefig(args.save_figure_path)
