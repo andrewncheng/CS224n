@@ -17,7 +17,7 @@ args = argp.parse_args()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 input_dim = 784
 hidden_dim = 300
-num_epochs = 7
+num_epochs = 80
 batch_size = 32
 lr = 5e-7
 
