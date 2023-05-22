@@ -41,9 +41,9 @@ for epoch in tqdm(range(num_epochs)):
         #print("KL_DIVERGENCE------", kl_divergence)
         optimizer.zero_grad()
         loss = reconstruction_loss + kl_divergence
-        if i %20 == 0:
-            print("RECONSTRUCTION LOSS", reconstruction_loss)
-            print("KL_DIVERGENCE", kl_divergence)
+        # if i %20 == 0:
+        #     print("RECONSTRUCTION LOSS", reconstruction_loss)
+        #     print("KL_DIVERGENCE", kl_divergence)
         loss.backward()
         optimizer.step()
         pbar.set_postfix(loss=loss.item())
