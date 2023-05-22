@@ -7,7 +7,7 @@ class VAE(nn.Module):
         super().__init__()
         self.hidden_dim = hidden_dim
         self.input_dim = input_dim
-
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.encoder = nn.Sequential(
             nn.Linear(self.input_dim, 512),
             nn.ReLU(),
@@ -41,7 +41,7 @@ class VAE(nn.Module):
         return z
 
     def forward(self, x):
-        mu, logvar = self.encode(x)
+        mu, logvar = self.encode(x).to(self.device)
         z = self.sample(mu, logvar)
         x_reconstructed = self.decode(z)
         return x_reconstructed, mu, logvar
