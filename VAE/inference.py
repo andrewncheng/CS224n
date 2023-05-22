@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from VAE import VAE
 # configuration
-
+matplotlib.use('Agg')
 argp = argparse.ArgumentParser()
 argp.add_argument('--reading_params_path',default=None)
 argp.add_argument('--save_figures_path', default=None)
